@@ -1,0 +1,33 @@
+params:
+  # Dataset (SMIR/Anechoic)
+  fs: 48000
+
+  # Spherical
+  n_fft: 1024
+  n_channels: 32
+  n_shd: 4  # SHD order -> (N+1)**2 coefficients
+  fl: 2608.
+  fh: 5216.
+  olap: 4  # hop_size = n_fft / olap
+  j_nu: 25
+
+  # DPD
+  j_tau: 4
+  n_spcorr: 4
+
+paths:
+  smir_folder: /raid/projects/mmi599-pareto_fit/higrid/data/rdata
+  audio_folder: /raid/projects/mmi599-pareto_fit/higrid/data/sdata/anechoic/music
+
+experiment:
+  smir_name: spargair
+  mic_name: em32
+  smir_room: ii-s05
+  job: extract.pareto_params # extract.<job>: shd, dpd_ratios, pareto_params
+  audio_files: [mahler_vl1a_6.wav, mahler_vl1b_6.wav]
+  positions: 'all'  # available: perpendicular, all, list of gridpositions
+  samples: [0, 192000]
+  save: True
+
+misc:
+  n_threads: 4

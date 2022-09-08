@@ -64,3 +64,7 @@ def extract_dpd_ratios(
             ratio_list, save_path.with_suffix('.npy'), verbose=True)
 
     return ratio_list
+
+
+def job(*args, **kwargs):
+    extract_dpd_ratios(*args, **kwargs)

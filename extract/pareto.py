@@ -58,3 +58,7 @@ def extract_pareto_params(
         save_config(save_path.with_suffix('.json'), config)
 
     return shape, location, scale
+
+
+def job(*args, **kwargs):
+    extract_pareto_params(*args, **kwargs)

@@ -58,3 +58,7 @@ def extract_shd(
         save_shd(Anm, save_path.with_suffix('.npy'), verbose=True)
 
     return Anm
+
+
+def job(*args, **kwargs):
+    extract_shd(*args, **kwargs)
