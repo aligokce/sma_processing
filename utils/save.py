@@ -21,7 +21,7 @@ def save_ratio_list(ratio_list, save_path, verbose=True):
         print("Ratio values saved to:", save_path)
 
 
-def save_distrib_plot(ratio_list, shape, location, scale, save_path):
+def save_distrib_plot(ratio_list, shape, location, scale, pos_name: str, distance, save_path):
     import matplotlib.pyplot as plt
     from scipy.stats import genpareto
 
@@ -36,6 +36,7 @@ def save_distrib_plot(ratio_list, shape, location, scale, save_path):
     plt.hist(ratio_list, bins=range(
         0, max_singular_ratio+1, histogram_bin_freq), density=True)
     plt.plot(x, fitted_data, 'r-')
+    plt.title(f"Position: {pos_name} at {distance:.2f} m\n{shape=:.3f} {location=:.3f} {scale=:.3f}")
 
     Path(save_path).parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(save_path)

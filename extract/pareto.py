@@ -41,8 +41,9 @@ def extract_pareto_params(
     ''' Saves
     '''
     if save:
+        dist_mic = SMIRDataset.get_distance(position)
         save_path = Path.cwd() / SMIRDataset._pos_dir(position) / audio_file
-        save_distrib_plot(ratios, shape, location, scale,
+        save_distrib_plot(ratios, shape, location, scale, SMIRDataset._pos_dir(position), dist_mic,
                           save_path.with_suffix('.png'))
         # Save details and fitting results to a json file
         config = dict(
