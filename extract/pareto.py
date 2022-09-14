@@ -26,7 +26,7 @@ def extract_pareto_params(
     # n_spcorr: int = 4,
     # mic_name: str = 'em32',
     smir_name: str = 'spargair',
-    save=True,
+    save=False,
     # load_from_path=None,
     **kwargs
 ):
@@ -48,8 +48,8 @@ def extract_pareto_params(
         # Save details and fitting results to a json file
         config = dict(
             sndfile=audio_file,
-            pos_grid=position,
-            dist_mic=SMIRDataset.get_distance(position),
+            pos_grid=list(position),
+            dist_mic=dist_mic,
             pareto_params=dict(
                 shape=shape,
                 scale=scale,
