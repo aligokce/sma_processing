@@ -49,3 +49,11 @@ def save_config(save_path, config, verbose=True):
 
     if verbose:
         print("Config file saved to:", save_path)
+
+
+def save_lg_count(count, save_path, verbose=True):
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    np.save(save_path, count)
+
+    if verbose:
+        print(f"Maximum value: {count.max()} at {count.argmax()}")
