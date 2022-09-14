@@ -15,6 +15,12 @@ params:
   j_tau: 4
   n_spcorr: 4
 
+  # Legendre
+  tol: 0.1
+
+  # HEALPix
+  npix: 192
+
 paths:
   smir_folder: /raid/projects/mmi599-pareto_fit/higrid/data/rdata
   audio_folder: /raid/projects/mmi599-pareto_fit/higrid/data/sdata/anechoic/music
@@ -23,9 +29,9 @@ experiment:
   smir_name: spargair
   mic_name: em32
   smir_room: ii-s05
-  job: extract.pareto_params # extract.<job>: shd, dpd_ratios, pareto_params
-  audio_files: [mahler_vl1a_6.wav, mahler_vl1b_6.wav]
-  positions: 'all'  # available: perpendicular, all, list of gridpositions
+  job: extract.pareto_params # extract.<job>: shd, dpd_ratio, pareto_params, legendre_count
+  audio_files: [mahler_vl1a_6.wav] #, mahler_vl1b_6.wav]
+  positions: [[3,2,2]] # 'all'  # available: perpendicular, all, list of gridpositions
   samples: [0, 192000]
   save: True
 
