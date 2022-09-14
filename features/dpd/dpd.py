@@ -1,6 +1,9 @@
 import numpy as np
+from numba import njit
+from tqdm import trange
 
 
+@njit
 def spatial_corr(Anm, Ndec, find, tind, Jtau, Jnu):
     """
     From higrid.dpd.dpd
@@ -34,8 +37,8 @@ def generate_ratios_list(Anm, Ndec_spcorr, fimin, fimax, Jtau, Jnu):
     imax = Anm[0].shape[0]
 
     ratios_list = []
-    for tind in range(imax - Jtau):
-        for find in range(fimin, fimax):
+    for tind in trange(imax - Jtau, desc="Calculating singular ratios"):
+        for find in trange(fimin, fimax, leave=False):
             ratio = singular_ratio(Anm, Ndec_spcorr, find, tind, Jtau, Jnu)
             ratios_list.append(ratio)
 
