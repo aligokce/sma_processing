@@ -1,11 +1,17 @@
+from pathlib import Path
 from typing import Tuple
 
 import healpy as hp
 import numpy as np
 import scipy
+from joblib import Memory
 from tqdm import tqdm
 
 from ..utils import healpix_angles
+
+
+cache_dir = Path(__file__).parents[2] / ".cache"
+memory = Memory(cache_dir)
 
 
 def LegendreKernel(N: int, dir1: Tuple[float, float], dir2: Tuple[float, float]) -> float:
@@ -26,6 +32,7 @@ def LegendreKernelHealpix(N: int, dir: Tuple[float, float], npix: int) -> np.nda
     return np.fromiter((LegendreKernel(N, dir, dref) for dref in gridangles), float)
 
 
+@memory.cache
 def generate_legendre_dict_healpix(N: int, npix: int):
     '''
     Generates a dictionary from Legendre kernels on all possible HEALPix directions
