@@ -45,6 +45,7 @@ class Result(object):
         self.ypred = ypred
 
 
+# TODO: calculate for multiple y samples? need to conserve rent calculations
 def omp(X, y, ncoef=None, maxit=200, tol=1e-3, dtype=float):
     '''Compute sparse orthogonal matching pursuit solution with coefficients.
 
@@ -121,5 +122,5 @@ def omp(X, y, ncoef=None, maxit=200, tol=1e-3, dtype=float):
         if (en_residual < tol) | (len(active) >= ncoef) | (it == maxit-1):
             break
 
-    result.update(coef, active, err[:(it+1)], residual, ypred)
+    result.update(coefi, active, err[:(it+1)], residual, ypred)
     return result
