@@ -2,13 +2,19 @@
     Referenced from higrid.dpd.dpd
 """
 from collections import defaultdict
+from pathlib import Path
 
 import madmom as mm
 import numpy as np
 import tqdm
+from joblib import Memory
 from scipy import special as spec
 
 from ..utils import sph_jnyn
+
+
+cache_dir = Path(__file__).parents[2] / ".cache"
+memory = Memory(cache_dir, verbose=0)
 
 
 def preprocess_input(audio, n_channels, n_fft, olap):
@@ -34,6 +40,7 @@ def preprocess_input(audio, n_channels, n_fft, olap):
     return P
 
 
+@memory.cache
 def getBmat(micstruct, findmin, findmax, NFFT, Fs, Ndec):
     """
     Return the array (e.g. em32) specific response equalisation matrix, B
@@ -90,6 +97,7 @@ def getanmval(pvec, B, Y, W):
     return anm
 
 
+@memory.cache
 def getWY(micstruct, Ndec):
     """
     Return the array (e.g. em32) specific cubature and the SHD matrices, W and Y.H
