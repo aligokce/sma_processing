@@ -1,7 +1,6 @@
 """
     Referenced from higrid.dpd.dpd
 """
-
 from collections import defaultdict
 
 import madmom as mm
@@ -26,10 +25,12 @@ def preprocess_input(audio, n_channels, n_fft, olap):
     Uses STFT from madmom library since onset detection is also done by it. This can be replaced with any other TF
     bin selection method (e.g. direct-path dominance, RENT, soundfield directivity etc.).
     """
-    P = []
-    for ind in tqdm.trange(n_channels, desc="Preprocessing channels"):
-        ss = mm.audio.stft.STFT(audio[ind, :], frame_size=n_fft, hop_size=n_fft / olap, fft_size=n_fft)
-        P.append(np.array(ss))
+    assert audio.shape[0] == n_channels, f"{audio.shape=} is not consistent with given parameter value, {n_channels=}"
+
+    def _stft(signal, ch):
+        return mm.audio.stft.STFT(signal[ch, :], frame_size=n_fft, hop_size=n_fft / olap, fft_size=n_fft)
+
+    P = np.stack([_stft(audio, ch) for ch in tqdm.trange(n_channels, desc="Preprocessing channels")], axis=0)
     return P
 
 
@@ -72,11 +73,7 @@ def getpvec(P, tind, find):
     :param find: Frequency index
     :return: Selected time frequency bin containing N (e.g. 32) channels
     """
-    pvec = []
-    for ind in range(len(P)):
-        pvec.append(P[ind][tind, find])
-    pvec = np.matrix(pvec)
-    return pvec.T
+    return P[:, tind, find][:, np.newaxis]
 
 
 def getanmval(pvec, B, Y, W):
@@ -89,7 +86,7 @@ def getanmval(pvec, B, Y, W):
     :param W: Cubature matrix
     :return: SHD for a single time-frequency bin; (N+1)^2 by 1
     """
-    anm = B * Y * W * pvec
+    anm = B @ Y @ W @ pvec
     return anm
 
 
@@ -127,19 +124,13 @@ def getAnm(P, mstr, Bmat, findmin, findmax, Ndec):
     :param findmin: Index of minimum frequency (int)
     :param findmax: Index of maximum frequency (int)
     :param Ndec: SHD order
-    :return: List of numpy matrices containing the SHDs of STFTs of array channels (channel, time, frequency)
+    :return: ndarray of numpy matrices containing the SHDs of STFTs of array channels (channel, time, frequency)
     """
-    # A = []
     W, Y = getWY(mstr, Ndec)
-    # for ind in range((Ndec + 1) ** 2):
-    #     A.append(np.zeros((P[0].shape[0], P[0].shape[1]), dtype=complex))
     A = np.zeros(((Ndec + 1) ** 2, *P[0].shape), dtype=complex)
     for find in range(findmin, findmax):
         B = Bmat[find]
-        for tind in range(P[0].shape[0]):
-            pv = getpvec(P, tind, find)
-            anm = getanmval(pv, B, Y, W)
-            # for snd in range((Ndec + 1) ** 2):
-            #     A[snd][tind, find] = anm[snd]
-            A[:, tind, find] = anm.squeeze()
+        pv = P[:, :, find]
+        anm = B @ Y @ W @ pv
+        A[:, :, find] = anm
     return A
