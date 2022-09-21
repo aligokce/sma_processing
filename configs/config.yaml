@@ -37,3 +37,9 @@ experiment:
 
 misc:
   n_threads: 4
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: outputs/${experiment.job}/${experiment.smir_name}-${experiment.mic_name}/${experiment.smir_room}/
