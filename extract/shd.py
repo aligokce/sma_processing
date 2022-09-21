@@ -54,7 +54,7 @@ def extract_shd(
     ''' Saves
     '''
     if save:
-        save_path = Path.cwd() / SMIRDataset._pos_dir(position) / audio_file
+        save_path = Path.cwd() / SMIRDataset.pos2dir(position) / audio_file
         save_shd(Anm, save_path.with_suffix('.npy'), verbose=True)
 
     return Anm

@@ -34,7 +34,7 @@ class SMIRDataset:
         return sgo
 
     @staticmethod
-    def _pos_dir(pos):
+    def pos2dir(pos):
         raise NotImplementedError
 
     @staticmethod

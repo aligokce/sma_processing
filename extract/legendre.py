@@ -39,7 +39,7 @@ def extract_legendre_count(
     fimin = int(round(fl / fs * n_fft))
     fimax = int(round(fh / fs * n_fft))
 
-    save_path = Path.cwd() / SMIRDataset._pos_dir(position)
+    save_path = Path.cwd() / SMIRDataset.pos2dir(position)
     if len(list(save_path.glob(f"{audio_file.split('.')[0]}*.npy"))) > 0:
         print("Passing already extracted audios...")
         return
@@ -51,7 +51,7 @@ def extract_legendre_count(
         p = Path(load_from_path)
         assert p.isdir(), f"Given path is not a directory: {str(p)}"
 
-        load_path = p / SMIRDataset._pos_dir(position) / audio_file
+        load_path = p / SMIRDataset.pos2dir(position) / audio_file
         if load_path.exists():
             Anm = np.load(load_path.with_suffix('.npy'))
         else:
@@ -78,7 +78,7 @@ def extract_legendre_count(
     ''' Saves
     '''
     if save:
-        save_path = Path.cwd() / SMIRDataset._pos_dir(position) / audio_file
+        save_path = Path.cwd() / SMIRDataset.pos2dir(position) / audio_file
         save_path_count = save_path.with_name(save_path.stem + "_count" + ".npy")
         save_lg_count(count, save_path_count, verbose=False)
         save_path_rent = save_path.with_name(save_path.stem + "_rent" + ".npy")

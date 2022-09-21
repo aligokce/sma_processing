@@ -44,7 +44,7 @@ def extract_dpd_ratios(
         p = Path(load_from_path)
         assert p.isdir(), f"Given path is not a directory: {str(p)}"
 
-        load_path = p / SMIRDataset._pos_dir(position) / audio_file
+        load_path = p / SMIRDataset.pos2dir(position) / audio_file
         if load_path.exists():
             Anm = np.load(load_path.with_suffix('.npy'))
         else:
@@ -59,7 +59,7 @@ def extract_dpd_ratios(
     ''' Saves
     '''
     if save:
-        save_path = Path.cwd() / SMIRDataset._pos_dir(position) / audio_file
+        save_path = Path.cwd() / SMIRDataset.pos2dir(position) / audio_file
         save_ratio_list(
             ratio_list, save_path.with_suffix('.npy'), verbose=True)
 

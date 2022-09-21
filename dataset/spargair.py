@@ -14,44 +14,13 @@ class SPARGAir(SMIRDataset):
         self.channels = 32
 
     def emulate_scene(self, snd_path, pos: tuple, room='ii-s05', samples=(0, 96000)):
-        pos_dir = ''.join(map(str, pos))
+        pos_dir = self.pos2dir(pos)
         smir_path = join(room, pos_dir)
 
-        sg = self._emulate_scene(snd_path, smir_path, pos, samples)
-        # snd = wavread(file_path)
-        # snd = snd[0].reshape((snd[0].shape[0]))[samples[0]:samples[1]]
-        # gain = self.calculate_gain(pos)
-
-        # sg = emulatescene(snd, gain, join(self.path, room, drtxt))
-        return sg
-
-    # def compose_scene(self, file_path_list, positions, room='ii-s05', samples=(0, 96000)):
-    #     assert len(file_path_list) == len(positions)
-
-    #     nsamp = samples[1] - samples[0]
-    #     sgo = np.zeros((self.channels, nsamp))
-
-    #     for file_path, pos in zip(file_path_list, positions):
-    #         sgo += self.emulate_scene(file_path, pos, room, samples)
-    #     return sgo
-
-    # def compose_scene(self, file_path_list, positions, room='ii-s05', samples=(0, 96000)):
-    #     def _relate_positions(positions):
-    #         if positions == 'all':
-    #             return self.generate_positions()
-    #         elif positions == 'perpendicular':
-    #             return self.generate_perpendicular_positions()
-    #         else:
-    #             return positions
-
-    #     return super().compose_scene(
-    #         file_path_list, 
-    #         _relate_positions(positions), 
-    #         room, 
-    #         samples)
+        return self._emulate_scene(snd_path, smir_path, pos, samples)
 
     @staticmethod
-    def _pos_dir(pos):
+    def pos2dir(pos):
         return ''.join(map(str, pos))
 
     @staticmethod
