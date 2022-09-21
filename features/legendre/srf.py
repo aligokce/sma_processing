@@ -16,7 +16,7 @@ def srf(N, dir, Anm):
     Anm: Normalised SHD coefficients for each TF-bin
     '''
     theta, phi = dir  # colatitude, longtitude
-    sum = np.zeros(Anm[0].shape) * 1j
+    sum = np.zeros(Anm[0].shape, dtype=complex)
     for n in range(N + 1):
         for m in range(-n, n+1):
             # TODO: NOT SURE ABOUT THIS

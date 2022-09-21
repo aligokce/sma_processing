@@ -16,14 +16,14 @@ def extract_legendre_count(
     # smir_folder: str = None,
     # smir_room: str = None,
     # samples: tuple = (0, 192000),
-    # fs: int = 48000,
-    # n_fft: int = 1024,
+    fs: int = 48000,
+    n_fft: int = 1024,
     # n_channels: int = 32,
     n_shd: int = 4,
-    # fl: float = 2608.0,
-    # fh: float = 5126.0,
+    fl: float = 2608.0,
+    fh: float = 5126.0,
     # olap: int = 4,
-    # j_nu: int = 25,
+    j_nu: int = 25,
     # j_tau: int = 4,
     # n_spcorr: int = 4,
     # mic_name: str = 'em32',
@@ -35,6 +35,15 @@ def extract_legendre_count(
     **kwargs
 ):
     SMIRDataset = smir_datasets[smir_name]
+
+    fimin = int(round(fl / fs * n_fft))
+    fimax = int(round(fh / fs * n_fft))
+
+    save_path = Path.cwd() / SMIRDataset._pos_dir(position)
+    if len(list(save_path.glob(f"{audio_file.split('.')[0]}*.npy"))) > 0:
+        print("Passing already extracted audios...")
+        return
+
 
     ''' Extract
     '''
@@ -57,12 +66,13 @@ def extract_legendre_count(
     count = np.zeros(srf.shape[:2], dtype=int)
     rent = np.zeros(srf.shape[:2], dtype=float)
 
+    # TODO: limit tind and find to non-zero bins only, from fL and fH params?
     for tind in tqdm(range(srf.shape[0]), desc="Extracting Legendre kernel counts..."):
-        for find in tqdm(range(srf.shape[1]), leave=False):
-            y = srf[tind, find]
+        for find in range(fimin, fimax + j_nu):
+            y = srf[tind, find]  # (npix, )
             result = lg.omp(dictionary, y, dtype=complex, tol=tol)
             
-            count[tind, find] = len(result.coef.nonzero()[0])
+            count[tind, find] = len(result.active)
             rent[tind, find] = 1 - result.err[0]
 
     ''' Saves

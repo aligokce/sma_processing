@@ -11,7 +11,7 @@ from ..utils import healpix_angles
 
 
 cache_dir = Path(__file__).parents[2] / ".cache"
-memory = Memory(cache_dir)
+memory = Memory(cache_dir, verbose=0)
 
 
 def LegendreKernel(N: int, dir1: Tuple[float, float], dir2: Tuple[float, float]) -> float:
