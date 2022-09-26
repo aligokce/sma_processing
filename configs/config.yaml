@@ -35,8 +35,8 @@ experiment:
   samples: [0, 192000]
   save: True
 
-misc:
-  n_threads: 4
+multiprocessing: False
+n_threads: 1
 
 hydra:
   job:

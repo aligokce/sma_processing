@@ -43,11 +43,16 @@ def main(config: DictConfig):
 
     audio_files, positions = get_files_and_positions(config)
 
-    with Pool(processes=config.misc.n_threads) as pool:
-        pool.starmap(
-            get_job(config),
-            product(audio_files, positions)
-        )
+    if config.multiprocessing:
+        with Pool(processes=config.n_threads) as pool:
+            pool.starmap(
+                get_job(config),
+                product(audio_files, positions)
+            )
+    else:
+        for file, pos in product(audio_files, positions):
+            print(f"Processing {file} at position {pos}")
+            get_job(config)(file, pos)
 
 
 if __name__ == "__main__":
