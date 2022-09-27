@@ -37,6 +37,7 @@ experiment:
 
 multiprocessing: False
 n_threads: 1
+resume: True
 
 hydra:
   job:

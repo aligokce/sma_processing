@@ -25,6 +25,16 @@ def get_files_and_positions(config):
     return audio_files, positions
 
 
+def get_remaining_files_and_positions(config, input_generator):
+    for file, pos in input_generator:
+        _pos = smir_datasets[config.experiment.smir_name].pos2dir(pos)
+        _file = Path(file).stem
+        for _ in (Path.cwd() / _pos).glob(f"{_file}*"):
+            break
+        else:
+            yield file, pos
+
+
 def get_job(config):
     func = eval(config.experiment.job)
     job = partial(
@@ -42,15 +52,19 @@ def main(config: DictConfig):
     print(OmegaConf.to_yaml(config))
 
     audio_files, positions = get_files_and_positions(config)
+    inputs = product(audio_files, positions)
+    if config.resume:
+        print("Resuming processing...")
+        inputs = get_remaining_files_and_positions(config, inputs)
 
     if config.multiprocessing:
         with Pool(processes=config.n_threads) as pool:
             pool.starmap(
                 get_job(config),
-                product(audio_files, positions)
+                inputs
             )
     else:
-        for file, pos in product(audio_files, positions):
+        for file, pos in inputs:
             print(f"Processing {file} at position {pos}")
             get_job(config)(file, pos)
 
