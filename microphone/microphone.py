@@ -87,3 +87,6 @@ class MicrophoneArray(Microphone):
         :param typ: Type of the array (str)
         '''
         self.__arraytype = typ
+
+    def returnAsStruct(self):
+        raise NotImplementedError

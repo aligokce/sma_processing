@@ -6,7 +6,6 @@ from pathlib import Path
 
 import madmom as mm
 import numpy as np
-import tqdm
 from joblib import Memory
 from scipy import special as spec
 
@@ -36,7 +35,7 @@ def preprocess_input(audio, n_channels, n_fft, olap):
     def _stft(signal, ch):
         return mm.audio.stft.STFT(signal[ch, :], frame_size=n_fft, hop_size=n_fft / olap, fft_size=n_fft)
 
-    P = np.stack([_stft(audio, ch) for ch in tqdm.trange(n_channels, desc="Preprocessing channels")], axis=0)
+    P = np.stack([_stft(audio, ch) for ch in range(n_channels)], axis=0)
     return P
 
 

@@ -112,7 +112,7 @@ def omp(X, y, ncoef=None, maxit=200, tol=1e-3, dtype=float):
 
         # solve for new coefficients on active set
         coefi, _, _, _ = np.linalg.lstsq(
-            X[:, active], y, rcond=None)  # TODO: rcond?
+            X[:, active], y, rcond=None)
 
         # update residual vector and error
         residual = y - np.dot(X[:, active], coefi)

@@ -4,7 +4,7 @@ from tqdm import trange
 
 def spatial_corr(Anm, Ndec, find, tind, Jtau, Jnu):
     anm = Anm[:, tind:tind+Jtau, find:find+Jnu]
-    anm = anm.reshape(((Ndec + 1) ** 2, -1))
+    anm = anm.reshape(((Ndec + 1) ** 2, -1))  # ACN channel ordering
 
     Ra = anm @ anm.conj().T
     Ra = Ra / (Jtau * Jnu)

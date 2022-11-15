@@ -2,8 +2,6 @@ import itertools
 from os.path import join
 
 import numpy as np
-# from higrid.emulate import emulatescene
-# from higrid.utils import wavread
 
 from .smir import SMIRDataset
 
