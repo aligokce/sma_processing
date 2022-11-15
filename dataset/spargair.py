@@ -68,6 +68,9 @@ class SPARGAir(SMIRDataset):
         # Remove the positions right above and right beyond the mic array
         for p in [(3, 3, 0), (3, 3, 1), (3, 3, 3), (3, 3, 4)]:
             grid.remove(p)
+        # Remove corrupt positions
+        for p in [(0, 0, 1), (0, 1, 2), (0, 1, 4)]:
+            grid.remove(p)
 
         return grid
 
