@@ -46,7 +46,7 @@ def extract_shd(
 
     ''' Spherical harmonic decomposition
     '''
-    P = shd.preprocess_input(sig, n_channels, n_fft, olap)  # return: STFT
+    P = shd.preprocess_input(sig, n_fft, olap)  # return: STFT
     Bmat = shd.getBmat(mic, fimin, fimax + j_nu, n_fft, fs, n_shd)
     # Note: (Ndec + 1)**2 = 25 for Ndec = 4
     Anm = shd.getAnm(P, mic, Bmat, fimin, fimax + j_nu, n_shd)

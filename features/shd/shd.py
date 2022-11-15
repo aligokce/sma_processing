@@ -16,7 +16,7 @@ cache_dir = Path(__file__).parents[2] / ".cache"
 memory = Memory(cache_dir, verbose=0)
 
 
-def preprocess_input(audio, n_channels, n_fft, olap):
+def preprocess_input(audio, n_fft, olap):
     """
     Preprocess the input to represent in TF domain
 
@@ -30,7 +30,8 @@ def preprocess_input(audio, n_channels, n_fft, olap):
     Uses STFT from madmom library since onset detection is also done by it. This can be replaced with any other TF
     bin selection method (e.g. direct-path dominance, RENT, soundfield directivity etc.).
     """
-    assert audio.shape[0] == n_channels, f"{audio.shape=} is not consistent with given parameter value, {n_channels=}"
+    assert len(audio.shape) == 2, f"Given audio is in unexpected shape: {audio.shape}"
+    n_channels = audio.shape[0]
 
     def _stft(signal, ch):
         return mm.audio.stft.STFT(signal[ch, :], frame_size=n_fft, hop_size=n_fft / olap, fft_size=n_fft)
@@ -68,32 +69,6 @@ def getBmat(micstruct, findmin, findmax, NFFT, Fs, Ndec):
                 bval.append(bnkra[ind] * 4 * np.pi * (1j) ** ind)
         Bmat[find] = np.linalg.inv(np.matrix(np.diag(bval)))
     return Bmat
-
-
-def getpvec(P, tind, find):
-    """
-    Return a single M-channel (e.g. 32 channel for em32) time-frequency bin
-
-    :param P: List of STFTs of each channel
-    :param tind: Time index
-    :param find: Frequency index
-    :return: Selected time frequency bin containing N (e.g. 32) channels
-    """
-    return P[:, tind, find][:, np.newaxis]
-
-
-def getanmval(pvec, B, Y, W):
-    """
-    Return the SHD for a single time-frequency bin
-
-    :param pvec: Vector containing M-channel STFTs of a single time-frequency bin
-    :param B: Response equalisation matrix
-    :param Y: SHD matrix
-    :param W: Cubature matrix
-    :return: SHD for a single time-frequency bin; (N+1)^2 by 1
-    """
-    anm = B @ Y @ W @ pvec
-    return anm
 
 
 @memory.cache
