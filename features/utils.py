@@ -1,6 +1,14 @@
-import numpy as np
+from pathlib import Path
+
 import healpy as hp
-from scipy import signal as sp, special as sp
+import numpy as np
+from joblib import Memory
+from scipy import signal as sp
+from scipy import special as sp
+
+
+cache_dir = Path(__file__).parents[2] / ".cache"
+memory = Memory(cache_dir, verbose=0)
 
 
 def sph_jnyn(N, kr):
@@ -49,3 +57,15 @@ def healpix_angles(npix: int, lonlat=False):
     nside = hp.npix2nside(npix)
     gridangles = [hp.pix2ang(nside, i) for i in range(npix)]
     return gridangles
+
+
+@memory.cache
+def sph_harm_healpix(n_pix, n_shd, lonlat=False):
+    S = np.zeros((n_pix, (n_shd + 1)**2), dtype=complex)
+    gridangles = healpix_angles(n_pix, lonlat)
+
+    for i, (theta, phi) in enumerate(gridangles):
+        for n in range(n_shd + 1):
+            for m in range(-n, n+1):
+                S[i, (n + m + n*n)] = sp.sph_harm(m, n, phi, theta)
+    return S
