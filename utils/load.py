@@ -4,112 +4,100 @@ import numpy as np
 import pandas as pd
 
 
-def load_json_to_df(
-    job="extract.legendre_count",
-    output_folder="./outputs"
-):
-    _output_dir = Path(output_folder).absolute()
-    _results_dir = _output_dir / job
-    result_files = list(_results_dir.glob(f"**/*.json"))
+def list_feature_files(output_path="./outputs", job="extract.legendre_count", suffix="_rent"):
+    """ 
+    Constructs a list of feature files given its specifications
+    """
+    
+    dir_output = Path(output_path)
+    dir_job = dir_output / Path(job)
+    assert dir_job.is_dir(), "Given path is not a directory"
 
-    print(f"Found {len(result_files)} files")
+    _suffix = suffix or ""
+    file_list = list(dir_job.glob(f"**/*{_suffix}.npy"))
+    assert len(file_list), f"Cannot find any feature files at path: {dir_job}"
 
-    df = pd.DataFrame()
-
-    for i, file in enumerate(result_files):
-        print(f"{i+1}/{len(result_files)}", end='\r')
-
-        with open(file, 'r') as f:
-            data = pd.read_json(f, orient='index').T
-            # df.append(data, ignore_index=True)
-            df = pd.concat((df, data), ignore_index=True)
-
-    return df.infer_objects()
+    return file_list
 
 
-def load_npy_stats_to_df(
-    job="extract.pareto_params",
-    suffix=None,
-    rv_name="gumbel_l",
-    output_folder="./outputs",
-    save=True,
-    load_from_saved=True,
-):
-    from scipy import stats
+def load_feature(file_path, fimin, fimax, j_nu):
+    """ 
+    Loads TF-domain feature from a file, discarding empty frequencies
+    """
+
+    feature = np.load(file_path)
+    return feature[:, fimin:fimax+j_nu]
+
+
+def parse_metadata(file_path, dataset='spargair', suffix=None):
+    """ 
+    Parses feature metadata given its file path
+    """
 
     from dataset import smir_datasets
-    spargair = smir_datasets['spargair']
 
-    # Parameters
-    fs = 48000
-    n_fft = 1024
-    fl = 2608.0
-    fh = 5216.0
-    j_nu = 25
+    filename = file_path.stem.split(suffix or "")[0] + '.wav'
+    pos_folder = file_path.parent.stem
+    position = tuple(int(p) for p in pos_folder)  # TODO: Generalize to datasets
+    distance = smir_datasets[dataset].get_distance(position)
 
-    fimin = int(round(fl / fs * n_fft))
-    fimax = int(round(fh / fs * n_fft))
+    return filename, pos_folder, distance
 
-    # Find corresponding .npy files
-    _output_dir = Path(output_folder).absolute()
-    _results_dir = _output_dir / job
-    _suffix = suffix or ""
-    result_files = list(_results_dir.glob(f"**/*{_suffix}.npy"))
 
-    print(f"Found {len(result_files)} files")
-    if not len(result_files): 
-        return
+def batch_load_metadata(file_list, verbose=True):
+    """ 
+    Loads features metadata into a pandas DataFrame for a given file list
+    """
 
-    # Check if already saved exists
-    if load_from_saved:
-        saved_files = list(_results_dir.glob(f"*{suffix}_{rv_name}.csv"))
-        if len(saved_files):  # either 0 or 1
-            print("Found saved results file")
-            df = pd.read_csv(saved_files[0])
-            if len(df) == len(result_files):
-                print("Saved results file is up to date")
-                return df
+    data = []
+    for i, f_path in enumerate(file_list):
+        if verbose:
+            print(f"{i+1}/{len(file_list)}", end='\r')
 
-    # Define random variable
-    rv = eval(f"stats.{rv_name}")
+        filename, pos_grid, distance = parse_metadata(
+            f_path, dataset='spargair', suffix='_rent')
 
-    df = pd.DataFrame()
+        data.append(dict(
+            sndfile=filename,
+            pos_grid=pos_grid,
+            dist_mic=distance,
+            path=f_path
+        ))
 
-    rv_stats_list = []
+    return pd.DataFrame(data)
 
-    for i, f_npy in enumerate(result_files):
-        print(f"{i+1}/{len(result_files)}", end='\r')
 
-        npy = np.load(f_npy)
-        if len(npy.shape) > 1:  # Flattened arrays already have necessary data only
-            npy = npy[:, fimin : fimax + j_nu]  # Discard unused frequency indices
-        
-        rv_stats = rv.fit(npy.flatten())  # Discard frequency information
-        rv_stats_list.append(rv_stats)
+def batch_load_features(file_list, fimin, fimax, j_nu, verbose=True):
+    """ 
+    Batch loads features given an .npy/npz path list
+    """
+    feature_list = []
+    for i, f_path in enumerate(file_list):
+        if verbose:
+            print(f"{i+1}/{len(file_list)}", end='\r')
 
-        # Metadata parsing
-        filename = f_npy.stem.split(suffix)[0] + '.wav'
-        pos_folder = f_npy.parent.stem
-        position = [int(p) for p in pos_folder]
-        distance = spargair.get_distance(position)
+        feature = load_feature(f_path, fimin, fimax, j_nu)
+        feature_list.append(feature)
 
-        # Load up the dataframe
-        data = pd.DataFrame([dict(
-            sndfile = filename,
-            pos_grid = pos_folder,
-            dist_mic = distance,
-        )])
-        df = pd.concat((df, data), ignore_index=True)
+    return np.array(feature_list)
 
-    rv_stats_arr = np.array(rv_stats_list)
 
-    # Batch load rv stats into df
-    for i in range(rv_stats_arr.shape[1]):
-        df[f"{rv_name}_{i}"] = rv_stats_arr[:, i]
+def batch_load_transform_features(file_list, transformer, fimin, fimax, j_nu, verbose=True):
+    """ 
+    Batch loads features and transforms using the function input
+    
+    NOTE: Transformer function is called inside the iteration loop. Note that you may
+    want to use a transforming function that accepts batch input whenever
+    possible, for that probably will be much faster compared to this.
+    """
+    assert callable(transformer), "'transformer' is not callable"
 
-    # Save
-    if save:
-        _job_root = job.split(".")[1]
-        df.to_csv(_results_dir.absolute() / f"{_job_root}{_suffix}_{rv_name}.csv", index=False)
+    transformed_features_list = []
+    for i, f_path in enumerate(file_list):
+        if verbose:
+            print(f"{i+1}/{len(file_list)}", end='\r')
 
-    return df.infer_objects()
+        feature = load_feature(f_path, fimin, fimax, j_nu)
+        transformed_features_list += transformer(feature)
+
+    return np.array(transformed_features_list)
