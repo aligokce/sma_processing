@@ -43,18 +43,19 @@ def rel_energy(y, value, valuetype='db') -> float:
     :return: Energy relative to the input signal array
     """
     types_available = ['db', 'ratio']
-    assert valuetype in types_available, f"Choose type from {types_available}"
     assert type(value) in [float, int], "Need input value as float or int"
 
     if valuetype == 'db':
         return np.linalg.norm(y)**2 * 10**(value*0.1)
     elif valuetype == 'ratio':
         return value * np.linalg.norm(y)**2
+    else:
+        raise AssertionError(f"Choose type from {types_available}")
 
 
 def healpix_angles(npix: int, lonlat=False):
     nside = hp.npix2nside(npix)
-    gridangles = [hp.pix2ang(nside, i) for i in range(npix)]
+    gridangles = [hp.pix2ang(nside, i, lonlat=lonlat) for i in range(npix)]
     return gridangles
 
 
