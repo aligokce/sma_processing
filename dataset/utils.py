@@ -1,57 +1,74 @@
-import struct
-import wave
-from os import listdir
-
 import numpy as np
-from scipy import signal as sp
+from scipy.signal import fftconvolve
+
+from utils import wavread
 
 
-def emulate_scene(insig, gain, irspath):
+def emulate_scene(sig_path, gain, ir_paths):
     """
-    Emulates a scene by convolving a source input signal with em32 AIRs
+    Emulate an acoustic scene for a sound.
 
-    :param insig: (Single-channel) input signal
-    :param gain: Gain (scalar)
-    :param irspath: Path to the AIRs to be used
-    :return: 32 channels of audio from an emulated em32 recording.
-    """
-    dr = listdir(irspath)
-    dr = sorted(dr)
-    wv = wavread(irspath + '/' + dr[0])
-    ir = np.zeros((32, wv[0].shape[0]))
-    for ind in range(32):
-        wv = wavread(irspath + '/' + dr[ind])
-        ir[ind, :] += wv[0].reshape((wv[0].shape[0]))
+    This function emulates room acoustics using an anechoic signal and a list of
+    impulse responses from desired locations.
 
-    sz = len(insig)
-    out = np.zeros((32, sz))
-    for ind in range(32):
-        out[ind, :] = sp.fftconvolve(gain * insig, ir[ind, :], mode='same')
-    return out
+    Parameters
+    ----------
+    sig_path : str or PathLike
+        Path to the anechoic sound file.
+    gain : float or int
+        Gain.
+    ir_paths : List[PathLike]
+        List of paths to the impulse responses.
 
-
-def wavread(wave_file):
-    """
-    Returns the contents of a wave file
-
-    :param wave_file: Path to the wave_file to be read
-    :return: (signal, sampling rate, number of channels)
-
-    NOTE: Wavread solution was adapted from https://bit.ly/2Ubs9Jp
+    Returns
+    -------
+    NDArray
+        Emulation signals, in the order given in `ir_paths`.
     """
 
-    w = wave.open(wave_file)
-    astr = w.readframes(w.getnframes())
-    nchan = w.getnchannels()
-    totsm = w.getnframes()
-    sig = np.zeros((nchan, totsm))
-    a = struct.unpack("%ih" % (w.getnframes() * w.getnchannels()), astr)
-    a = [float(val) / pow(2, 15) for val in a]
-    for ind in range(nchan):
-        b = a[ind::nchan]
-        sig[ind] = b
+    # We expect ir_paths to be ACN channel sorted
+    sig, _ = wavread(sig_path)
+    irs = [wavread(f)[0] for f in ir_paths]
 
-    sig = np.transpose(sig)
-    fs = w.getframerate()
-    w.close()
-    return sig, fs, nchan
+    out = [fftconvolve(gain * sig, ir, mode='same') for ir in irs]
+    return np.stack(out, axis=0)
+
+
+def compose_scene(sig_path_list, ir_paths_list, gain=1, samples=(0, 48000)):
+    """
+    Composes multiple room acoustics emulations, generally for emulating
+    simultaneous sources in an acoustic environment.
+
+    Parameters
+    ----------
+    sig_path_list : List[PathLike]
+        List of paths to the anechoic sound files.
+    ir_paths_list : List[List[PathLike]]
+        List of list of paths to the impulse responses. Expected to be in order.
+        Inner list represents the channels, and outer list the source positions.
+        Each list is associated with the anechoic sound given in `sig_path_list`
+        at the same index.
+    gain : int, optional
+        Gain, by default 1
+    samples : tuple, optional
+        Start and stop samples, by default (0, 48000). Mind the sampling rate.
+
+    Returns
+    -------
+    NDArray
+        Emulation signals, in the order given in `ir_paths_list`.
+    """
+    # Assertions
+    assert samples[1] > samples[0]
+    assert len(sig_path_list) == len(ir_paths_list), \
+        f"There are {len(sig_path_list)} audio(s) but {len(ir_paths_list)} IR position(s)."
+
+    n_channels = len(ir_paths_list[0])
+    assert n_channels > 0
+
+    # Open a blank canvas
+    sgo = np.zeros((n_channels, samples[1] - samples[0]))
+
+    for sig_path, ir_paths in zip(sig_path_list, ir_paths_list):
+        sgo += emulate_scene(sig_path, gain, ir_paths)
+    return sgo
