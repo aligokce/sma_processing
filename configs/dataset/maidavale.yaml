@@ -1,0 +1,6 @@
+_name_: maidavale
+mic: em32
+fs: 48000
+rooms:
+  - MV4
+  - MV5

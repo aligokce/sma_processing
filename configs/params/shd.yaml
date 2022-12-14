@@ -1,0 +1,9 @@
+defaults:
+  - fft
+
+fl: 2608.
+fh: 5216.
+fs: ${dataset.fs}  # TODO: this or inside dataset? what about anechoic?
+
+n_shd: 4
+j_nu: 25

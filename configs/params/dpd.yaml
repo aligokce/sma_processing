@@ -1,0 +1,5 @@
+defaults:
+  - shd
+
+n_spcorr: 4
+j_tau: 4

@@ -1,0 +1,5 @@
+defaults:
+  - shd
+  - healpix
+
+omp_tol: 0.1

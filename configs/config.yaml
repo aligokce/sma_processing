@@ -1,46 +1,20 @@
-params:
-  # Dataset (SMIR/Anechoic)
-  fs: 48000
-
-  # Spherical
-  n_fft: 1024
-  n_channels: 32
-  n_shd: 4  # SHD order -> (N+1)**2 coefficients
-  fl: 2608.
-  fh: 5216.
-  olap: 4  # hop_size = n_fft / olap
-  j_nu: 25
-
-  # DPD
-  j_tau: 4
-  n_spcorr: 4
-
-  # Legendre
-  tol: 0.1
-
-  # HEALPix
-  npix: 192
+defaults:
+  - experiment: extract.rent
+  - override /dataset: maidavale
+  - _self_
 
 paths:
-  smir_folder: /raid/projects/mmi599-pareto_fit/higrid/data/rdata
-  audio_folder: /raid/projects/mmi599-pareto_fit/higrid/data/sdata/anechoic/music
+  smir: /raid/datasets/Maida_Vale_IR_Database/MV4/AS2/Eigenmike Capsules/
+  anechoic: /raid/projects/mmi599-pareto_fit/higrid/data/sdata/anechoic/
 
-experiment:
-  smir_name: spargair
-  mic_name: em32
-  smir_room: ii-s05
-  job: extract.pareto_params # extract.<job>: shd, dpd_ratio, pareto_params, legendre_count
-  audio_files: [mahler_vl1a_6.wav] #, mahler_vl1b_6.wav]
-  positions: [[3,2,2]] # 'all'  # available: perpendicular, all, list of gridpositions
-  samples: [0, 192000]
-  save: True
-
-multiprocessing: False
-n_threads: 1
-resume: True
+run_name: ${now:%Y-%m-%d_%H-%M-%S}
 
 hydra:
   job:
     chdir: True
   run:
-    dir: outputs/${experiment.job}/${experiment.smir_name}-${experiment.mic_name}/${experiment.smir_room}/
+    dir: outputs/${_name_}/${dataset._name_}-${dataset.mic}/${analyse.room}/${run_name}
+
+resume: True
+n_threads: 4
+save: False

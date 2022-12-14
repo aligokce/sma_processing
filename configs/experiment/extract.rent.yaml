@@ -1,0 +1,23 @@
+# @package _global_
+defaults:
+  - /params: rent
+  - /dataset: spargair
+  - _self_
+
+_name_: extract.rent
+
+analyse:
+#   # mic: em32
+  room: ii-s05
+#   positions: all  # or list
+#   samples: [0, 192000]
+  anechoic_files: all  # or list
+
+save: True
+n_threads: 1
+resume: ???  # Should be specified for preventing accidental overwrite
+
+# pipe:
+#   - shd
+#   - srf
+#   - rent
