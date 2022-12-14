@@ -22,7 +22,7 @@ def singular_ratio(Anm, Ndec, find, tind, Jtau, Jnu):
     return ratio
 
 
-def generate_ratios_list(Anm, Ndec_spcorr, fimin, fimax, Jtau, Jnu):
+def extract_ratios(Anm, Ndec_spcorr, fimin, fimax, Jtau, Jnu):
     imax = Anm.shape[1]
 
     ratios_list = []

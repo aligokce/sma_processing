@@ -6,8 +6,7 @@ from joblib import Memory
 from scipy import signal as sp
 from scipy import special as sp
 
-
-cache_dir = Path(__file__).parents[2] / ".cache"
+cache_dir = Path(__file__).parents[1] / ".cache"
 memory = Memory(cache_dir, verbose=0)
 
 

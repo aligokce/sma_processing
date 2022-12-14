@@ -1,17 +1,11 @@
-from pathlib import Path
 from typing import Tuple
 
 import healpy as hp
 import numpy as np
 import scipy
-from joblib import Memory
 from tqdm import tqdm
 
-from ..utils import healpix_angles
-
-
-cache_dir = Path(__file__).parents[2] / ".cache"
-memory = Memory(cache_dir, verbose=0)
+from .utils import healpix_angles, memory
 
 
 def LegendreKernel(N: int, dir1: Tuple[float, float], dir2: Tuple[float, float]) -> float:
@@ -20,7 +14,7 @@ def LegendreKernel(N: int, dir1: Tuple[float, float], dir2: Tuple[float, float])
     '''
     Pn = scipy.special.legendre
     angdist = hp.rotator.angdist(dir1, dir2).item()
-    return np.sum((2*n + 1)/(4*np.pi) * Pn(n)(np.cos(angdist)) for n in range(N + 1))
+    return np.sum((2*n + 1)/(4*np.pi) * Pn(n)(np.cos(angdist)) for n in range(N + 1))  # type: ignore
 
 
 def LegendreKernelHealpix(N: int, dir: Tuple[float, float], npix: int) -> np.ndarray:

@@ -1,1 +1,0 @@
-from .dpd import generate_ratios_list

@@ -2,18 +2,12 @@
     Referenced from higrid.dpd.dpd
 """
 from collections import defaultdict
-from pathlib import Path
 
 import madmom as mm
 import numpy as np
-from joblib import Memory
 from scipy import special as spec
 
-from ..utils import sph_jnyn
-
-
-cache_dir = Path(__file__).parents[2] / ".cache"
-memory = Memory(cache_dir, verbose=0)
+from .utils import sph_jnyn, memory
 
 
 def preprocess_input(audio, n_fft, olap):
@@ -30,7 +24,8 @@ def preprocess_input(audio, n_fft, olap):
     Uses STFT from madmom library since onset detection is also done by it. This can be replaced with any other TF
     bin selection method (e.g. direct-path dominance, RENT, soundfield directivity etc.).
     """
-    assert len(audio.shape) == 2, f"Given audio is in unexpected shape: {audio.shape}"
+    assert len(
+        audio.shape) == 2, f"Given audio is in unexpected shape: {audio.shape}"
     n_channels = audio.shape[0]
 
     def _stft(signal, ch):
@@ -116,3 +111,13 @@ def getAnm(P, mstr, Bmat, findmin, findmax, Ndec):
         anm = B @ Y @ W @ pv
         A[:, :, find] = anm
     return A
+
+
+def extract(y, fs, n_fft, olap, n_shd, fimin, fimax, j_nu, mic):
+    ''' 
+    Spherical harmonic decomposition
+    '''
+    P = preprocess_input(y, n_fft, olap)  # return: STFT
+    Bmat = getBmat(mic, fimin, fimax + j_nu, n_fft, fs, n_shd)
+    Anm = getAnm(P, mic, Bmat, fimin, fimax + j_nu, n_shd)
+    return Anm

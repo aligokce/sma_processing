@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import sph_harm
 
-from ..utils import healpix_angles, sph_harm_healpix
+from .utils import sph_harm_healpix
 
 
 def srf(N, dir, Anm):
@@ -35,3 +35,9 @@ def srf_healpix(N, Anm, npix, optimize=True, lonlat=False):
     '''
     S = sph_harm_healpix(npix, N, lonlat)
     return np.einsum('ntf, pn -> tfp', Anm, S, optimize=optimize)
+
+
+def extract(Anm, n_pix):
+    n_shd = int(np.sqrt(Anm.shape[0]) - 1)
+    srf = srf_healpix(n_shd, Anm, n_pix)
+    return srf
