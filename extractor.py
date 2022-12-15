@@ -85,7 +85,7 @@ class Extractor:
             p['fimin'] = int(
                 round(params['fl'] / params['fs'] * params['n_fft']))
             p['fimax'] = int(
-                round(params['fl'] / params['fs'] * params['n_fft']))
+                round(params['fh'] / params['fs'] * params['n_fft']))
         return p
 
     @staticmethod
@@ -108,7 +108,7 @@ def rent_pipe(
     fimin,
     fimax,
     j_nu,
-    mic, 
+    mic,
     n_pix,  # srf
     **kwargs
 ):
