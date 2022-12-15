@@ -6,8 +6,8 @@ Summary
 * This repository contains a library for some of the features commonly used in spherical array microphone processing.
 * These features are mostly used for **direction-of-arrival (DOA)** and **six-degrees of freedom (6DoF)** problems
 * It is easy to add new features, datasets, microphones.
-* This repository consists of two main interfaces: `features` as library and `extract` via main script and config files.
-* Scripts are for extracting batch features from emulations of selected anechoic/music files on SMIR dataset over different positions and rooms.
+* This repository consists of two main interfaces: `features` as library and main script as feature extractor using config files.
+* `main.py` is for extracting batch features from emulations of selected anechoic/music files on SMIR dataset over different positions and rooms.
 * Batch extraction can easily be done for readily-prepared classes for datasets and microphones using integrated configuration system via `hydra`.
 
 
@@ -22,6 +22,7 @@ Supported
 
 ### SMIR datasets
 - METU SPARG AIR [(Zenodo)](https://zenodo.org/record/2635758)
+- BBC Maida Vale Impulse Response Dataset [(Zenodo)](https://zenodo.org/record/7267562)
 - *TODO: TAU-SRIR DB [(Zenodo)](https://zenodo.org/record/6408611)*
 
 ### Microphones
@@ -29,14 +30,21 @@ Supported
 - *TODO: Zylia [ZM-1](https://www.zylia.co/zylia-zm-1-microphone.html)*
 
 
-Available experiment parameters
--------------------------------
-### `experiment.job`
-* `extract.<job>`: `shd`, `dpd_ratio`, `pareto_params`, `legendre_count`
-* *TODO:* `analyse.<job> ` for automatic reporting of analytics on extracted features 
+How to use
+----------
+```py
+python main.py --help
+```
 
-### `experiment.positions`
-* `'all'`, `'perpendicular'`, `[ [ 3, 2, 2 ], ... ]`
+
+Tasks
+-----
+- [ ] Add support for real SMA recordings
+- [ ] Fix fimin/fimax passing everywhere and discard empty npy portions
+- [ ] Build a pipeline system
+- [ ] Implement analyse functions
+- [ ] wandb integration for analyse?
+- [ ] Integrate room simulations
 
 
 References
