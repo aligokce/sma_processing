@@ -26,7 +26,7 @@ class Extractor:
         self.params = self._load_params(params)
         self.dataset = dataset
 
-    def job(self, anechoic_path, scenario, save=True, output_shd=False):
+    def job(self, anechoic_path, scenario, save=True):
         """
         RENT extraction job
 
@@ -54,12 +54,11 @@ class Extractor:
         res = rent_pipe(
             y,
             **self.params,
-            mic=microphones[scenario['mic']],
-            output_shd=output_shd
+            mic=microphones[scenario['mic']]
         )
 
         if save:
-            return self.save_result(res, anechoic_path, scenario, output_shd)
+            return self.save_result(res, anechoic_path, scenario)
         return res
 
     def load_signal(self, sig_path, scenario):
@@ -102,24 +101,19 @@ class Extractor:
 
 def rent_pipe(
     y,
-    # shd
-    fs,
+    fs,     # shd
     n_fft,
     olap,
     n_shd,
     fimin,
     fimax,
     j_nu,
-    mic,
-    # srf
-    n_pix,
-    # output_shd=False,
+    mic, 
+    n_pix,  # srf
     **kwargs
 ):
     Anm = shd.extract(y, fs, n_fft, olap, n_shd, fimin, fimax, j_nu, mic)
     S = srf.extract(Anm, n_pix)
     R = rent.extract(S, n_shd, fimin, fimax, j_nu)
 
-    # if output_shd:
-    #     return R, Anm
     return R

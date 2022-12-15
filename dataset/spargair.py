@@ -60,6 +60,7 @@ class SPARGAir(SMIRDataset):
         df.columns = ['mic', 'src_pos']  # type: ignore
         df['mic_pos'] = '332'
         df['room'] = 'ii-s05'
+        df['src_dir'] = 'D'
         return df
 
     @staticmethod
