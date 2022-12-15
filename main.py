@@ -78,6 +78,10 @@ def main(config: DictConfig):
     # Prepare for extraction
     dataset, extractor, audio_files, input_gen = prepare(config)
 
+    if config.save:
+        from rich import print as pprint
+        pprint("Saving to:", Path.cwd())
+
     # Choose running serial or parallel
     if config.n_threads <= 1:
         run_serial(extractor, input_gen, save=config.save, n_audio=len(

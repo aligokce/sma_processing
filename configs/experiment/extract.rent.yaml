@@ -8,7 +8,7 @@ _name_: extract.rent
 
 analyse:
 #   # mic: em32
-  room: ii-s05
+  room: MV4
 #   positions: all  # or list
 #   samples: [0, 192000]
   anechoic_files: all  # or list
